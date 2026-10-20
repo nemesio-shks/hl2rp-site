@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+	<defs>
+		<radialGradient id="glow" cx="80%" cy="0%" r="70%"><stop offset="0" stop-color="#16303b"/><stop offset="1" stop-color="#0b0f13"/></radialGradient>
+		<linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b0f13" stop-opacity="0"/><stop offset="1" stop-color="#0b0f13"/></linearGradient>
+	</defs>
+	<rect width="1600" height="900" fill="url(#glow)"/>
+	<!-- citadel -->
+	<path fill="#14232c" d="M1390 900 1410 260l14-70 12-70 12 70 14 70 20 640Z"/>
+	<!-- rooftops -->
+	<path fill="#0f171d" d="M0 900V770h70v-40h50v60h40v-80h70v60h50v-30h60v70h40v-110h90v90h40v-40h70v60h60v-40h50v80h40v-60h80v40h50v-100h70v70h50v-30h60v50h70v-80h80v90h40v-50h60v70h60v-30h70v120Z"/>
+	<rect y="600" width="1600" height="300" fill="url(#fade)"/>
+</svg>

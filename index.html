@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>City 17 | HL2RP</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- background layers -->
+<div class="bg">
+	<div class="grid"></div>
+	<div class="sky" id="sky"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+		<defs>
+			<linearGradient id="cit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d3a47"/><stop offset="1" stop-color="#0d151b"/></linearGradient>
+			<linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b0f13" stop-opacity="0"/><stop offset="1" stop-color="#0b0f13"/></linearGradient>
+		</defs>
+		<rect class="beam" x="1429" y="0" width="14" height="900"/>
+		<path fill="url(#cit)" d="M1390 900 1410 260l14-70 12-70 12 70 14 70 20 640Z"/>
+		<circle class="tip-light" cx="1436" cy="122" r="3"/>
+	</svg></div>
+	<div class="city" id="city"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+		<path fill="#0f171d" d="M0 900V770h70v-40h50v60h40v-80h70v60h50v-30h60v70h40v-110h90v90h40v-40h70v60h60v-40h50v80h40v-60h80v40h50v-100h70v70h50v-30h60v50h70v-80h80v90h40v-50h60v70h60v-30h70v120Z"/>
+		<g class="wins"><rect x="96" y="790" width="5" height="7"/><rect x="252" y="740" width="5" height="7"/><rect x="430" y="700" width="5" height="7"/><rect x="452" y="730" width="5" height="7"/><rect x="760" y="770" width="5" height="7"/><rect x="1004" y="690" width="5" height="7"/><rect x="1180" y="740" width="5" height="7"/><rect x="1540" y="790" width="5" height="7"/></g>
+		<rect y="640" width="1600" height="260" fill="url(#fade)"/>
+	</svg></div>
+	<canvas id="dust"></canvas>
+	<div class="sweep"></div>
+	<div class="scan"></div>
+	<div class="vignette"></div>
+</div>
+
+<header class="top">
+	<div class="wrap">
+		<a href="#" class="logo"><span class="ico" data-icon="combine"></span><span data-bind="name"></span></a>
+		<nav>
+			<a data-href="rules" target="_blank">Rules</a>
+			<a data-href="store" target="_blank">Store</a>
+			<a data-href="discord" target="_blank">Discord</a>
+		</nav>
+	</div>
+</header>
+
+<main>
+	<section class="hero">
+		<div class="wrap">
+			<div class="intro">
+				<p class="sub"><span class="typed" id="typed"></span><span class="caret">_</span></p>
+				<h1 class="glitch" id="title"></h1>
+				<p class="about rv" data-bind="about"></p>
+				<div class="btns rv">
+					<a class="btn shine" data-connect><span>▶</span> Join server</a>
+					<a class="btn alt" data-href="workshop" target="_blank">Workshop content</a>
+				</div>
+			</div>
+
+			<div class="server rv tilt">
+				<span class="corner tl"></span><span class="corner br"></span>
+				<div class="row"><span><i class="dot" id="dot"></i><span id="state">Online</span></span><span id="map" class="mono"></span></div>
+				<div class="count"><b id="on">0</b> / <span id="max">0</span> players</div>
+				<div class="bar"><i id="bar"></i></div>
+				<div class="ip">IP <code id="ip" title="Click to copy"></code></div>
+				<div class="clock mono"><span>Overwatch time</span><span id="clock">--:--:--</span></div>
+			</div>
+		</div>
+	</section>
+
+	<section class="factions">
+		<div class="wrap" id="factions"></div>
+	</section>
+
+	<section class="start rv">
+		<div class="wrap">
+			<h2>How to start playing</h2>
+			<ol>
+				<li>Subscribe to our <a data-href="workshop" target="_blank">workshop collection</a> so you don't see missing textures.</li>
+				<li>Join the <a data-href="discord" target="_blank">Discord</a> for news, events and support.</li>
+				<li>Read the <a data-href="rules" target="_blank">rules</a>, then hit <a data-connect>Join server</a>.</li>
+			</ol>
+		</div>
+	</section>
+</main>
+
+<footer>
+	<div class="ticker"><div class="track mono" id="ticker"></div></div>
+	<div class="wrap"><span>© <span id="year"></span> <span data-bind="name"></span></span><span>Not affiliated with Valve</span></div>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="assets/icons.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

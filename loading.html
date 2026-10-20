@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Loading</title>
+<!--
+	GMod loading screen. Add this to server.cfg:
+	  sv_loadingurl "https://your-domain/loading.html"
+	ES5 only, so it also runs on the default GMod branch (Awesomium).
+-->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#0b0f13;color:#dfe6eb;font-family:'Segoe UI',Arial,sans-serif}
+.mono{font-family:Consolas,'Courier New',monospace;letter-spacing:.06em}
+.layer{position:absolute;top:0;left:0;right:0;bottom:0}
+.bg{background:radial-gradient(ellipse at 85% 0%,#163240 0%,transparent 65%)}
+.grid{background-image:linear-gradient(rgba(63,184,212,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(63,184,212,.05) 1px,transparent 1px);background-size:48px 48px;-webkit-animation:grid 20s linear infinite;animation:grid 20s linear infinite}
+@-webkit-keyframes grid{to{background-position:48px 48px}}@keyframes grid{to{background-position:48px 48px}}
+.city{background:url(assets/bg.svg) center bottom/cover no-repeat}
+.sweep{height:200px;top:-200px;bottom:auto;background:linear-gradient(rgba(63,184,212,0),rgba(63,184,212,.07),rgba(63,184,212,0));-webkit-animation:sweep 8s linear infinite;animation:sweep 8s linear infinite}
+@-webkit-keyframes sweep{to{top:100%}}@keyframes sweep{to{top:100%}}
+.scan{background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0,rgba(0,0,0,.22) 1px,transparent 1px,transparent 3px)}
+.vig{background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.6))}
+canvas{position:absolute;top:0;left:0}
+
+.hud{position:absolute;top:34px;left:70px;right:70px;font-size:12px;color:#8796a3;text-transform:uppercase}
+.hud .r{float:right}
+.rec{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4b4b;margin-right:8px;-webkit-animation:blink 1.2s infinite;animation:blink 1.2s infinite}
+@-webkit-keyframes blink{50%{opacity:.15}}@keyframes blink{50%{opacity:.15}}
+
+.box{position:absolute;left:70px;bottom:70px;width:580px}
+.logo{width:46px;height:46px;margin-bottom:14px;-webkit-animation:spin 16s linear infinite;animation:spin 16s linear infinite}
+@-webkit-keyframes spin{to{-webkit-transform:rotate(360deg)}}@keyframes spin{to{transform:rotate(360deg)}}
+.logo svg{width:100%;height:100%}
+.sub{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;min-height:22px}
+.caret{-webkit-animation:blink 1s steps(1) infinite;animation:blink 1s steps(1) infinite}
+h1{font-size:64px;line-height:1.1;margin:4px 0 24px;text-shadow:0 0 30px rgba(63,184,212,.3)}
+.tip{color:#8796a3;font-size:15px;min-height:24px;margin-bottom:22px;padding-left:12px;border-left:2px solid;-webkit-transition:opacity .4s;transition:opacity .4s}
+.status{font-size:14px;margin-bottom:8px;overflow:hidden}
+.status span{float:right;color:#8796a3}
+.bar{height:5px;background:#1c252d;overflow:hidden}
+.bar i{position:relative;display:block;height:100%;width:0;overflow:hidden;-webkit-transition:width .4s;transition:width .4s}
+.bar i b{position:absolute;top:0;bottom:0;width:60px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.6),rgba(255,255,255,0));-webkit-animation:sh 1.6s infinite;animation:sh 1.6s infinite}
+@-webkit-keyframes sh{from{left:-60px}to{left:100%}}@keyframes sh{from{left:-60px}to{left:100%}}
+.file{font-size:12px;color:#5d6c78;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pct{position:absolute;right:70px;bottom:62px;font-size:96px;font-weight:800;color:rgba(223,230,235,.08);line-height:1}
+</style>
+</head>
+<body>
+<div class="layer bg"></div>
+<div class="layer grid"></div>
+<div class="layer city"></div>
+<canvas id="dust"></canvas>
+<div class="layer sweep"></div>
+<div class="layer scan"></div>
+<div class="layer vig"></div>
+
+<div class="hud mono"><span><i class="rec"></i>Overwatch surveillance active</span><span class="r" id="clock">00:00:00</span></div>
+
+<div class="box">
+	<div class="logo" id="logo"></div>
+	<div class="sub"><span id="sub"></span><span class="caret">_</span></div>
+	<h1 id="name"></h1>
+	<p class="tip" id="tip"></p>
+	<div class="status mono"><b id="status">Connecting...</b><span id="map"></span></div>
+	<div class="bar"><i id="bar"><b></b></i></div>
+	<div class="file mono" id="file">&nbsp;</div>
+</div>
+<div class="pct mono" id="pct">0%</div>
+
+<script src="config.js"></script>
+<script src="assets/icons.js"></script>
+<script>
+(function () {
+	var S = window.SITE, L = S.loading || {}, acc = S.accent;
+	function $(id) { return document.getElementById(id); }
+	function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+	function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+	$('logo').innerHTML = ICONS.combine;
+	$('logo').style.color = acc;
+	$('sub').style.color = acc;
+	$('name').innerHTML = esc(S.name);
+	$('bar').style.background = acc;
+	$('bar').style.boxShadow = '0 0 12px ' + acc;
+	$('tip').style.borderColor = acc;
+
+	// typing tagline
+	var tg = S.tagline, ti = 0;
+	(function type() { $('sub').innerHTML = esc(tg.slice(0, ++ti)); if (ti < tg.length) setTimeout(type, 50); })();
+
+	// clock
+	setInterval(function () { var d = new Date(); $('clock').innerHTML = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }, 1000);
+
+	// tips
+	var tips = L.tips || [], n = 0;
+	function tip() {
+		if (!tips.length) return;
+		$('tip').style.opacity = 0;
+		setTimeout(function () { $('tip').innerHTML = esc(tips[n++ % tips.length]); $('tip').style.opacity = 1; }, 400);
+	}
+	tip(); setInterval(tip, 6000);
+
+	// dust
+	var cv = $('dust'), ctx = cv.getContext('2d'), W = cv.width = window.innerWidth, H = cv.height = window.innerHeight, parts = [], i;
+	for (i = 0; i < 60; i++) parts.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.6 + .3, vx: Math.random() * .3 - .1, vy: -(Math.random() * .25 + .05), a: Math.random() * .5 + .1 });
+	setInterval(function () {
+		ctx.clearRect(0, 0, W, H); ctx.fillStyle = acc;
+		for (var j = 0; j < parts.length; j++) {
+			var p = parts[j]; p.x += p.vx; p.y += p.vy;
+			if (p.y < -5) { p.y = H + 5; p.x = Math.random() * W; }
+			ctx.globalAlpha = p.a; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill();
+		}
+	}, 33);
+
+	var music = null;
+	if (L.music) { music = new Audio(L.music); music.loop = true; music.volume = 0.3; try { music.play(); } catch (e) {} }
+
+	// functions called by Garry's Mod
+	var total = 0, needed = 0;
+	function progress() {
+		if (!total) return;
+		var p = Math.round((total - needed) / total * 100);
+		$('bar').style.width = p + '%';
+		$('pct').innerHTML = p + '%';
+	}
+	window.GameDetails = function (servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
+		$('map').innerHTML = esc(mapname);
+		if (music && volume !== undefined) music.volume = volume * 0.5;
+	};
+	window.SetFilesTotal = function (t) { total = t; progress(); };
+	window.SetFilesNeeded = function (t) { needed = t; progress(); };
+	window.DownloadingFile = function (f) { needed = Math.max(0, needed - 1); $('file').innerHTML = esc(f); progress(); };
+	window.SetStatusChanged = function (s) { $('status').innerHTML = esc(s); };
+
+	// fake progress when opened in a normal browser, just for preview
+	if (navigator.userAgent.indexOf('GMod') < 0) {
+		GameDetails('', '', S.demoStatus.map, S.demoStatus.max, '', 'HL2RP', 0.5);
+		SetFilesTotal(40); SetFilesNeeded(40);
+		var k = 0, t = setInterval(function () {
+			DownloadingFile('materials/models/citizen/file_' + k + '.vtf');
+			SetStatusChanged('Downloading files (' + (++k) + '/40)');
+			if (k >= 40) { clearInterval(t); SetStatusChanged('Sending client info...'); $('file').innerHTML = '&nbsp;'; }
+		}, 200);
+	}
+})();
+</script>
+</body>
+</html>
