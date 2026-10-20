@@ -40,7 +40,7 @@
 	function countTo(el, to) {
 		var from = +el.textContent || 0, t0 = performance.now();
 		(function step(t) {
-			var p = Math.min(1, (t - t0) / 1200);
+			var p = Math.max(0, Math.min(1, (t - t0) / 1200));
 			el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
 			if (p < 1) requestAnimationFrame(step);
 		})(t0);
